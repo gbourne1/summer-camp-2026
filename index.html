@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summer 2026 Camp Calendar</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Password screen styles */
+        #password-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+        }
+        #password-screen h1 {
+            color: white;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        #password-screen .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        #password-screen input {
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            width: 250px;
+        }
+        #password-screen input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        #password-screen button {
+            padding: 12px 30px;
+            font-size: 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        #password-screen button:hover {
+            transform: scale(1.05);
+        }
+        #password-screen .error {
+            color: #FF6B6B;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* Calendar styles */
+        #calendar-content { display: none; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; color: white; font-size: 2.5rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); font-size: 1.2rem; margin-bottom: 10px; }
+        .priorities { text-align: center; color: white; font-size: 1rem; margin-bottom: 25px; background: rgba(255,255,255,0.15); padding: 10px; border-radius: 10px; }
+        .legend { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 8px; background: white; padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .legend-color { width: 20px; height: 20px; border-radius: 5px; }
+        .img-academy { background: linear-gradient(135deg, #FF6B6B, #ee5a5a); }
+        .blue-bay { background: linear-gradient(135deg, #87CEEB, #5fb8e8); }
+        .nyc-juniors { background: linear-gradient(135deg, #FFB347, #ff9500); }
+        .surf { background: linear-gradient(135deg, #90EE90, #5fd35f); }
+        .available { background: linear-gradient(135deg, #FFFACD, #fff176); }
+        .calendar-grid { display: grid; gap: 12px; }
+        .week-row { background: white; border-radius: 15px; padding: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: grid; grid-template-columns: 80px repeat(5, 1fr) 180px; gap: 8px; align-items: stretch; }
+        .header-row { display: grid; grid-template-columns: 80px repeat(5, 1fr) 180px; gap: 8px; margin-bottom: 10px; padding: 0 12px; }
+        .header-cell { background: #1F4E79; color: white; padding: 10px; border-radius: 10px; text-align: center; font-weight: bold; font-size: 0.9rem; }
+        .week-label { display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f0f4f8; border-radius: 10px; padding: 8px; }
+        .week-num { font-size: 1.3rem; font-weight: bold; color: #1F4E79; }
+        .week-date { font-size: 0.75rem; color: #666; }
+        .day-cell { border-radius: 10px; padding: 10px 8px; text-align: center; display: flex; flex-direction: column; justify-content: center; min-height: 70px; transition: transform 0.2s, box-shadow 0.2s; }
+        .day-cell:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .day-cell.img-academy { background: linear-gradient(135deg, #FF6B6B, #ee5a5a); color: white; }
+        .day-cell.blue-bay { background: linear-gradient(135deg, #87CEEB, #5fb8e8); color: #1a3a4a; }
+        .day-cell.nyc-juniors { background: linear-gradient(135deg, #FFB347, #ff9500); color: #5a3600; }
+        .day-cell.surf { background: linear-gradient(135deg, #90EE90, #5fd35f); color: #1a4a1a; }
+        .day-cell.available { background: linear-gradient(135deg, #FFFACD, #fff176); color: #5a5000; }
+        .nyc-academy { background: linear-gradient(135deg, #DDA0DD, #BA55D3); }
+        .day-cell.nyc-academy { background: linear-gradient(135deg, #DDA0DD, #BA55D3); color: #3d1a47; }
+        .camp-name { font-size: 0.8rem; font-weight: 600; }
+        .camp-detail { font-size: 0.7rem; opacity: 0.85; margin-top: 2px; }
+        .notes-cell { background: #f8f9fa; border-radius: 10px; padding: 8px; font-size: 0.8rem; color: #555; display: flex; align-items: center; }
+        .summary-section { background: white; border-radius: 15px; padding: 25px; margin-top: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .summary-section h2 { color: #1F4E79; margin-bottom: 20px; border-bottom: 3px solid #667eea; padding-bottom: 10px; font-size: 1.3rem; }
+        .camp-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; }
+        .camp-card { border-radius: 10px; padding: 15px; border-left: 5px solid; }
+        .camp-card.img-card { background: #ffe8e8; border-color: #FF6B6B; }
+        .camp-card.blue-bay-card { background: #e6f4f9; border-color: #87CEEB; }
+        .camp-card.nyc-card { background: #fff5e6; border-color: #FFB347; }
+        .camp-card.surf-card { background: #e8fae8; border-color: #90EE90; }
+        .camp-card.academy-card { background: #f5e6f5; border-color: #DDA0DD; }
+        .camp-card h3 { margin-bottom: 10px; font-size: 1rem; }
+        .camp-card p { margin: 4px 0; font-size: 0.85rem; color: #555; }
+        .camp-card strong { color: #333; }
+        .priority-badge { display: inline-block; background: #1F4E79; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; margin-left: 5px; }
+        .highlight { background: #ffffd0; padding: 2px 5px; border-radius: 3px; }
+        .total-section { background: linear-gradient(135deg, #1F4E79, #2d6a9f); color: white; border-radius: 10px; padding: 20px; margin-top: 20px; text-align: center; }
+        .total-section h3 { font-size: 1.1rem; margin-bottom: 10px; }
+        .total-amount { font-size: 2rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <!-- Password Screen -->
+    <div id="password-screen">
+        <h1>🏐 Summer 2026 Camp Calendar</h1>
+        <div class="login-box">
+            <p style="margin-bottom: 20px; color: #666;">Enter password to view calendar</p>
+            <input type="password" id="password-input" placeholder="Password" onkeypress="if(event.key==='Enter')checkPassword()">
+            <br>
+            <button onclick="checkPassword()">View Calendar</button>
+            <p class="error" id="error-msg">Incorrect password. Try again.</p>
+        </div>
+    </div>
+
+    <!-- Calendar Content (hidden until password entered) -->
+    <div id="calendar-content">
+        <div class="container">
+            <h1>☀️ Summer 2026 Camp Calendar</h1>
+            <p class="subtitle">Rising 8th Grader • June 8 – August 21, 2026</p>
+            <div class="priorities">
+                <strong>Priority Order:</strong> 1️⃣ IMG Volleyball → 2️⃣ NYC VB Academy → 3️⃣ Camp Blue Bay → 4️⃣ NYC Juniors → 5️⃣ CoreysWave Surf
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-color img-academy"></div>IMG Academy</div>
+                <div class="legend-item"><div class="legend-color blue-bay"></div>Camp Blue Bay</div>
+                <div class="legend-item"><div class="legend-color nyc-juniors"></div>NYC Juniors</div>
+                <div class="legend-item"><div class="legend-color surf"></div>CoreysWave Surf</div>
+                <div class="legend-item"><div class="legend-color nyc-academy"></div>NYC VB Academy</div>
+                <div class="legend-item"><div class="legend-color available"></div>Available</div>
+            </div>
+
+            <div class="header-row">
+                <div class="header-cell">Week</div>
+                <div class="header-cell">Mon</div>
+                <div class="header-cell">Tue</div>
+                <div class="header-cell">Wed</div>
+                <div class="header-cell">Thu</div>
+                <div class="header-cell">Fri</div>
+                <div class="header-cell">Notes</div>
+            </div>
+
+            <div class="calendar-grid">
+                <!-- Week 1 -->
+                <div class="week-row">
+                    <div class="week-label"><span class="week-num">1</span><span class="week-date">Jun 8</span></div>
+                    <div class="day-cell img-academy"><div class="camp-name">IMG Academy</div><div class="camp-detail">Florida</div></div>
+                    <div class="day-cell img-academy"><div class="camp-name">IMG Academy</div><div class="camp-detail">Florida</div></div>
+                    <div class="day-cell img-academy"><div class="camp-name">IMG Academy</div><div class="camp-detail">Florida</div></div>
+                    <div class="day-cell img-academy"><div class="camp-name">IMG Academy</div><div class="camp-detail">Florida</div></div>
+                    <div class="day-cell img-academy"><div class="camp-name">IMG Academy</div><div class="camp-detail">Florida</div></div>
+                    <div class="notes-cell">🏐 IMG Week 1 (Check-in Sun Jun 7)</div>
+                </div>
+
+                <!-- Week 2 -->
+                <div class="week-row">
+                    <div class="week-label"><span class="week-num">2</span><span class="week-date">Jun 15</span></div>
+                    <div class="day-cell img-academy"><div class="camp-name">IMG Academy</div><div class="camp-detail">Florida</div></div>
+                    <div class="day-cell img-academy"><div class="camp-name">IMG Academy</div><div class="camp-detail">Florida</div></div>
+                    <div class="day-cell img-academy"><div class="camp-name">IMG Academy</div><div class="camp-detail">Florida</div></div>
+                    <div class="day-cell img-academy"><div class="camp-name">IMG Academy</div><div class="camp-detail">Florida</div></div>
+                    <div class="day-cell img-academy"><div class="camp-name">IMG Academy</div><div class="camp-detail">Florida</div></div>
+                    <div class="notes-cell">🏐 IMG Week 2 (Check-out Sat Jun 20)</div>
+                </div>
+
+                <!-- Week 3 -->
+                <div class="week-row">
+                    <div class="week-label"><span class="week-num">3</span><span class="week-date">Jun 22</span></div>
+                    <div class="day-cell available"><div class="camp-name">Available</div></div>
+                    <div class="day-cell available"><div class="camp-name">Available</div></div>
+                    <div class="day-cell available"><div class="camp-name">Available</div></div>
+                    <div class="day-cell available"><div class="camp-name">Available</div></div>
+                    <div class="day-cell available"><div class="camp-name">Available</div></div>
+                    <div class="notes-cell">Rest week after IMG</div>
+                </div>
+
+                <!-- Week 4 -->
+                <div class="week-row">
+                    <div class="week-label"><span class="week-num">4</span><span class="week-date">Jun 29</span></div>
+                    <div class="day-cell available"><div class="camp-name">Available</div></div>
+                    <div class="day-cell available"><div class="camp-name">Available</div></div>
+                    <div class="day-cell available"><div class="camp-name">Available</div></div>
+                    <div class="day-cell available"><div class="camp-name">Available</div></div>
+                    <div class="day-cell available"><div class="camp-name">Travel</div><div class="camp-detail">→ Hamptons</div></div>
+                    <div class="notes-cell">Rest / Travel to Hamptons Fri</div>
+                </div>
+
+                <!-- Week 5 - NYC VB Academy Jul 6-9 -->
+                <div class="week-row">
+                    <div class="week-label"><span class="week-num">5</span><span class="week-date">Jul 6</span></div>
+                    <div class="day-cell nyc-academy"><div class="camp-name">NYC VB Acad</div><div class="camp-detail">9AM-Noon</div></div>
+                    <div class="day-cell nyc-academy"><div class="camp-name">NYC VB Acad</div><div class="camp-detail">9AM-Noon</div></div>
+                    <div class="day-cell nyc-academy"><div class="camp-name">NYC VB Acad</div><div class="camp-detail">9AM-Noon</div></div>
+                    <div class="day-cell nyc-academy"><div class="camp-name">NYC VB Acad</div><div class="camp-detail">9AM-Noon</div></div>
+                    <div class="day-cell available"><div class="camp-name">Available</div></div>
+                    <div class="notes-cell">🏐 NYC VB Academy Jul 6-9</div>
+                </div>
+
+                <!-- Week 6 - Blue Bay starts Tue Jul 14 -->
+                <div class="week-row">
+                    <div class="week-label"><span class="week-num">6</span><span class="week-date">Jul 13</span></div>
+                    <div class="day-cell available"><div class="camp-name">Available</div></div>
+                    <div class="day-cell blue-bay"><div class="camp-name">Blue Bay</div><div class="camp-detail">Check-in!</div></div>
+                    <div class="day-cell blue-bay"><div class="camp-name">Blue Bay</div><div class="camp-detail">Overnight</div></div>
+                    <div class="day-cell blue-bay"><div class="camp-name">Blue Bay</div><div class="camp-detail">Overnight</div></div>
+                    <div class="day-cell blue-bay"><div class="camp-name">Blue Bay</div><div class="camp-detail">Overnight</div></div>
+                    <div class="notes-cell">🏕️ Blue Bay starts TUE Jul 14</div>
+                </div>
+
+                <!-- Week 7 - Blue Bay Week 2 -->
+                <div class="week-row">
+                    <div class="week-label"><span class="week-num">7</span><span class="week-date">Jul 20</span></div>
+                    <div class="day-cell blue-bay"><div class="camp-name">Blue Bay</div><div class="camp-detail">Overnight</div></div>
+                    <div class="day-cell blue-bay"><div class="camp-name">Blue Bay</div><div class="camp-detail">Overnight</div></div>
+                    <div class="day-cell blue-bay"><div class="camp-name">Blue Bay</div><div class="camp-detail">Overnight</div></div>
+                    <div class="day-cell blue-bay"><div class="camp-name">Blue Bay</div><div class="camp-detail">Overnight</div></div>
+                    <div class="day-cell blue-bay"><div class="camp-name">Blue Bay</div><div class="camp-detail">Overnight</div></div>
+                    <div class="notes-cell">🏕️ Camp Blue Bay Week 2</div>
+                </div>
+
+                <!-- Week 8 - Blue Bay ends Tue -->
+                <div class="week-row">
+                    <div class="week-label"><span class="week-num">8</span><span class="week-date">Jul 27</span></div>
+                    <div class="day-cell blue-bay"><div class="camp-name">Blue Bay</div><div class="camp-detail">Overnight</div></div>
+                    <div class="day-cell blue-bay"><div class="camp-name">Blue Bay</div><div class="camp-detail">Check-out!</div></div>
+                    <div class="day-cell available"><div class="camp-name">Available</div></div>
+                    <div class="day-cell available"><div class="camp-name">Available</div></div>
+                    <div class="day-cell available"><div class="camp-name">Available</div></div>
+                    <div class="notes-cell">🏕️ Blue Bay ends TUE Jul 28</div>
+                </div>
+
+                <!-- Week 9 - NYC Juniors -->
+                <div class="week-row">
+                    <div class="week-label"><span class="week-num">9</span><span class="week-date">Aug 3</span></div>
+                    <div class="day-cell nyc-juniors"><div class="camp-name">NYC Juniors</div><div class="camp-detail">9:30-2:30</div></div>
+                    <div class="day-cell nyc-juniors"><div class="camp-name">NYC Juniors</div><div class="camp-detail">9:30-2:30</div></div>
+                    <div class="day-cell nyc-juniors"><div class="camp-name">NYC Juniors</div><div class="camp-detail">9:30-2:30</div></div>
+                    <div class="day-cell nyc-juniors"><div class="camp-name">NYC Juniors</div><div class="camp-detail">9:30-2:30</div></div>
+                    <div class="day-cell nyc-juniors"><div class="camp-name">NYC Juniors</div><div class="camp-detail">9:30-2:30</div></div>
+                    <div class="notes-cell">🏐 NYC Juniors Full Day - $750</div>
+                </div>
+
+                <!-- Week 10 - Surf -->
+                <div class="week-row">
+                    <div class="week-label"><span class="week-num">10</span><span class="week-date">Aug 10</span></div>
+                    <div class="day-cell surf"><div class="camp-name">CoreysWave</div><div class="camp-detail">Ditch Plains</div></div>
+                    <div class="day-cell surf"><div class="camp-name">CoreysWave</div><div class="camp-detail">Ditch Plains</div></div>
+                    <div class="day-cell surf"><div class="camp-name">CoreysWave</div><div class="camp-detail">Ditch Plains</div></div>
+                    <div class="day-cell surf"><div class="camp-name">CoreysWave</div><div class="camp-detail">Ditch Plains</div></div>
+                    <div class="day-cell surf"><div class="camp-name">CoreysWave</div><div class="camp-detail">Ditch Plains</div></div>
+                    <div class="notes-cell">🏄 Surf Week! WARM water!</div>
+                </div>
+
+                <!-- Week 11 -->
+                <div class="week-row">
+                    <div class="week-label"><span class="week-num">11</span><span class="week-date">Aug 17</span></div>
+                    <div class="day-cell available"><div class="camp-name">Available</div></div>
+                    <div class="day-cell available"><div class="camp-name">Available</div></div>
+                    <div class="day-cell available"><div class="camp-name">Available</div></div>
+                    <div class="day-cell available"><div class="camp-name">Available</div></div>
+                    <div class="day-cell available"><div class="camp-name">Last Day!</div><div class="camp-detail">Aug 21 🎉</div></div>
+                    <div class="notes-cell">Last week of summer!</div>
+                </div>
+            </div>
+
+            <div class="summary-section">
+                <h2>📋 Camp Details & Registration Info</h2>
+                <div class="camp-info">
+                    <div class="camp-card img-card">
+                        <h3>🏐 IMG Academy Volleyball <span class="priority-badge">Priority 1</span></h3>
+                        <p><strong>Dates:</strong> June 7-20, 2026 (2 weeks)</p>
+                        <p><strong>Schedule:</strong> Sun check-in → Sat check-out</p>
+                        <p><strong>Location:</strong> Bradenton, Florida</p>
+                        <p><strong>Est. Cost:</strong> ~$5,000</p>
+                        <p><strong>Phone:</strong> 1-800-872-6425</p>
+                    </div>
+                    <div class="camp-card academy-card">
+                        <h3>🏐 NYC Volleyball Academy <span class="priority-badge">Priority 2</span></h3>
+                        <p><strong>Dates:</strong> <span class="highlight">Jul 6-9, 2026</span> (Mon-Thu)</p>
+                        <p><strong>Times:</strong> <span class="highlight">9:00 AM - 12:00 PM</span></p>
+                        <p><strong>Location:</strong> Hamptons (Southampton)</p>
+                        <p><strong>Level:</strong> Advanced / Club Level</p>
+                        <p><strong>Cost:</strong> $720</p>
+                    </div>
+                    <div class="camp-card blue-bay-card">
+                        <h3>🏕️ Camp Blue Bay <span class="priority-badge">Priority 3</span></h3>
+                        <p><strong>Dates:</strong> Jul 14-28, 2026 (2 weeks)</p>
+                        <p><strong>Schedule:</strong> <span class="highlight">Tue → Tue</span></p>
+                        <p><strong>Location:</strong> East Hampton, NY</p>
+                        <p><strong>Cost:</strong> $1,700 ($850/wk)</p>
+                        <p><strong>Register:</strong> Opens Feb 11, 2026 @ 9am</p>
+                    </div>
+                    <div class="camp-card nyc-card">
+                        <h3>🏐 NYC Juniors <span class="priority-badge">Priority 4</span></h3>
+                        <p><strong>Program:</strong> All-Skills Day Camp (FULL DAY)</p>
+                        <p><strong>Dates:</strong> Aug 3-7, 2026</p>
+                        <p><strong>Times:</strong> <span class="highlight">9:30am - 2:30pm</span></p>
+                        <p><strong>Location:</strong> Brooklyn, NY</p>
+                        <p><strong>Cost:</strong> $750</p>
+                    </div>
+                    <div class="camp-card surf-card">
+                        <h3>🏄 CoreysWave Surf <span class="priority-badge">Priority 5</span></h3>
+                        <p><strong>Dates:</strong> Aug 10-14, 2026</p>
+                        <p><strong>Why August:</strong> <span class="highlight">WARM water!</span></p>
+                        <p><strong>Location:</strong> Ditch Plains, Montauk</p>
+                        <p><strong>Est. Cost:</strong> ~$900</p>
+                        <p><strong>Contact:</strong> 631-668-WAVE</p>
+                    </div>
+                </div>
+
+                <div class="total-section">
+                    <h3>💰 Estimated Total Summer Camp Costs</h3>
+                    <div class="total-amount">~$9,070 - $9,470</div>
+                    <p style="margin-top: 10px; font-size: 0.9rem;">IMG ($5,000) + NYC VB Academy ($720) + Blue Bay ($1,700) + NYC Juniors ($750) + Surf (~$900)</p>
+                </div>
+            </div>
+
+            <div class="summary-section">
+                <h2>📝 Key Dates & Action Items</h2>
+                <div style="display: grid; gap: 12px; font-size: 0.95rem;">
+                    <p>✅ <strong>NOW:</strong> Call IMG Academy (1-800-872-6425) to confirm June 2026 dates</p>
+                    <p>✅ <strong>NOW:</strong> Contact CoreysWave (631-668-WAVE) about August availability</p>
+                    <p>📅 <strong>Jan 21, 2026:</strong> Camp Blue Bay Info Session (7:30pm)</p>
+                    <p>🚨 <strong>Feb 11, 2026 @ 9am:</strong> Camp Blue Bay registration opens - BOOK IMMEDIATELY!</p>
+                    <p>📅 <strong>March-April 2026:</strong> <span class="highlight">NYC Juniors 2026 summer schedule expected to be posted</span></p>
+                    <p>✅ <strong>July 6, 2026:</strong> <span class="highlight">NYC Volleyball Academy sessions begin ($720)</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkPassword() {
+            var password = document.getElementById('password-input').value;
+            if (password === 'summer2026') {
+                document.getElementById('password-screen').style.display = 'none';
+                document.getElementById('calendar-content').style.display = 'block';
+            } else {
+                document.getElementById('error-msg').style.display = 'block';
+                document.getElementById('password-input').value = '';
+            }
+        }
+    </script>
+</body>
+</html>
