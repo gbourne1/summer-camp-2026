@@ -115,6 +115,89 @@
         .total-section { background: linear-gradient(135deg, #1F4E79, #2d6a9f); color: white; border-radius: 10px; padding: 20px; margin-top: 20px; text-align: center; }
         .total-section h3 { font-size: 1.1rem; margin-bottom: 10px; }
         .total-amount { font-size: 2rem; font-weight: bold; }
+
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            h1 { font-size: 1.6rem; }
+            .subtitle { font-size: 1rem; }
+            .priorities { font-size: 0.85rem; padding: 8px; }
+            .legend { gap: 8px; }
+            .legend-item { padding: 5px 10px; font-size: 0.75rem; }
+            .legend-color { width: 15px; height: 15px; }
+
+            .header-row { display: none; }
+
+            .week-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+                padding: 10px;
+                border-radius: 12px;
+            }
+            .week-label {
+                grid-column: 1 / -1;
+                flex-direction: row;
+                gap: 10px;
+                padding: 6px 12px;
+                border-radius: 8px;
+            }
+            .week-num { font-size: 1.1rem; }
+            .week-date { font-size: 0.8rem; }
+            .day-cell {
+                min-height: 50px;
+                padding: 8px 6px;
+                border-radius: 8px;
+            }
+            .day-cell::before {
+                font-size: 0.6rem;
+                opacity: 0.7;
+                margin-bottom: 2px;
+            }
+            .camp-name { font-size: 0.75rem; }
+            .camp-detail { font-size: 0.65rem; }
+            .notes-cell {
+                grid-column: 1 / -1;
+                font-size: 0.75rem;
+                padding: 6px 10px;
+                border-radius: 8px;
+            }
+
+            /* Label days on mobile */
+            .week-row .day-cell:nth-child(2)::before { content: "Mon"; display: block; }
+            .week-row .day-cell:nth-child(3)::before { content: "Tue"; display: block; }
+            .week-row .day-cell:nth-child(4)::before { content: "Wed"; display: block; }
+            .week-row .day-cell:nth-child(5)::before { content: "Thu"; display: block; }
+            .week-row .day-cell:nth-child(6)::before { content: "Fri"; display: block; }
+
+            .summary-section { padding: 15px; border-radius: 12px; }
+            .summary-section h2 { font-size: 1.1rem; margin-bottom: 15px; }
+            .camp-info { grid-template-columns: 1fr; gap: 10px; }
+            .camp-card { padding: 12px; }
+            .camp-card h3 { font-size: 0.9rem; }
+            .camp-card p { font-size: 0.8rem; }
+            .priority-badge { font-size: 0.6rem; padding: 2px 6px; }
+            .total-section { padding: 15px; }
+            .total-amount { font-size: 1.5rem; }
+            .total-section p { font-size: 0.75rem !important; }
+
+            #password-screen h1 { font-size: 1.5rem; }
+            #password-screen .login-box { padding: 25px; margin: 0 10px; }
+            #password-screen input { width: 200px; font-size: 14px; }
+        }
+
+        @media (max-width: 400px) {
+            .week-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 4px;
+                padding: 8px;
+            }
+            .day-cell { min-height: 45px; padding: 6px 4px; }
+            /* 5 days in 2 cols: last day spans full */
+            .week-row .day-cell:nth-child(6) { grid-column: 1 / -1; }
+            .camp-name { font-size: 0.7rem; }
+            .legend { gap: 5px; }
+            .legend-item { padding: 4px 8px; font-size: 0.7rem; }
+        }
     </style>
 </head>
 <body>
